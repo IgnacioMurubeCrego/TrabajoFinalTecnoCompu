@@ -2,7 +2,7 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date: 06.12.2023 17:56:07
+-- Create Date: 07.12.2023 15:30:41
 -- Design Name: 
 -- Module Name: canMachine - Behavioral
 -- Project Name: 
@@ -21,130 +21,79 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use ieee.numeric_std.all;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+use IEEE.NUMERIC_STD.ALL;
 
 entity canMachine is
-Port ( coin_in : in std_logic_vector(2 downto 0);
-       clk, rst : in std_logic;
-       lata : out std_logic;
+Port ( clk, rst : in std_logic;
+       coin_in : in std_logic_vector(2 downto 0); 
+       lata : out std_logic; 
        coin_out : out std_logic_vector(2 downto 0)
-        );
+      );
 end canMachine;
 
 architecture Behavioral of canMachine is
 
-signal precio_lata : std_logic_vector(2 downto 0) := "010";
-signal counter : std_logic_vector(2 downto 0);
-signal en_resta : std_logic := '0';
-signal suma_resta : std_logic_vector(2 downto 0) := "000";
-type SM_state is (E0,E1,E2,E3,E4,E5);
-signal CS, NS : SM_state;
- 
-component full_add_sub_Nbits is
-Generic( N : integer := 3
-        );
-Port ( clk : in std_logic;
-       A,B : in std_logic_vector(N-1 downto 0);
-       add_sub : in std_logic;
-       S : out std_logic_vector(N downto 0)
-    );
-end component;
+type state is (E0,E1,E2);
+signal CS,NS : state; -- Current State, Next State
+signal money_in : std_logic_vector(2 downto 0); 
+signal precio_lata : unsigned(2 downto 0) := "010";
 
 begin
 
-SUMADOR_RESTADOR : full_add_sub_Nbits
-generic map ( N => 3 )
-port map (
-          clk => clk,
-          A => counter,
-          B => suma_resta,
-          add_sub => en_resta,
-          S => counter
-          );
-
--- Bucle Transición de Estados Maquina de Moore :
-process(clk,rst,coin_in)
+-- Cambios de Estado con RST sincrono, suma del cambio introducido
+process(clk)
 begin
     if rising_edge(clk) then
-    
-        case CS is 
-        
-        -- Estado 0 :
-            when E0 =>
-                if rst = '1' then
-                    NS <= E0;
-                elsif (coin_in = "001") then
-                    NS <= E1;
-                elsif (coin_in = "010") then
-                    NS <= E2;
-                elsif (coin_in = "101") then
-                    NS <= E5;
-                else 
-                    NS <= CS;
-                end if;
-                
-            -- Estado 1 :
-            when E1 =>
-                if rst = '1' then
-                    NS <= E0;
-                elsif (coin_in = "001") then
-                    NS <= E2;
-                elsif (coin_in = "010") then
-                    NS <= E3;
-                elsif (coin_in = "101") then
-                    NS <= E4;
-                else
-                    NS <= CS;
-                end if;
-                
-            -- Estado 2 :
-            when E2 =>
-                NS <= E0;
-                
-            -- Estado 3 :
-            when E3 =>
-                NS <= E0;
-                
-            -- Estado 4 :
-            when E4 =>
-                NS <= E0;
-                
-            -- Estado 5 :
-            when E5 =>
-                NS <= E0;
-            
-        end case;
+        if rst = '0' then
+            CS <= NS;
+            money_in <= std_logic_vector(unsigned(money_in) + unsigned(coin_in));
+        else
+            CS <= E0;
+        end if;
     end if;
 end process;
 
--- Casos por Estado :
-process(CS,coin_in,counter)
+-- Salidas
+process(CS,coin_in,rst,money_in,precio_lata)
 begin
-    case CS is
+    case CS is 
         when E0 =>
-            suma_resta <= coin_in;
-            en_resta <= '0';
+            money_in <= "000";
             lata <= '0';
-            counter <= "000";
+            coin_out <= "000";
+            if coin_in = "001" then
+                NS <= E1;
+            elsif coin_in = "010" then
+                NS <= E2;
+            elsif coin_in = "101" then
+                NS <= E2;
+            else
+                NS <= CS;
+            end if;
+            
         when E1 =>
-            suma_resta <= coin_in;
-            en_resta <= '0';
             lata <= '0';
-        when others =>
-            suma_resta <= precio_lata;
-            en_resta <= '1';
+            if rst = '1' then
+                coin_out <= "001";
+            else
+                coin_out <= "000";
+            end if;
+            if coin_in = "001" then
+                NS <= E2;
+            elsif coin_in = "010" then
+                NS <= E2;
+            elsif coin_in = "101" then
+                NS <= E2;
+            else
+                NS <= CS;
+            end if;
+            
+         when E2 => 
             lata <= '1';
+            coin_out <= std_logic_vector(unsigned(money_in) - 2 );
+            NS <= E0;
+
     end case;
-    coin_out <= counter;
 end process;
 
 end Behavioral;
