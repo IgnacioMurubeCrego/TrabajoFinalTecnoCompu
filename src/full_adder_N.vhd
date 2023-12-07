@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use IEEE.NUMERIC_STD.ALL;
 
 entity full_adder_N is
-Generic ( N : integer := 4
+Generic ( N : integer := 3
 );
 Port (  A : in std_logic_vector(N-1 downto 0);
         B : in std_logic_vector(N-1 downto 0);

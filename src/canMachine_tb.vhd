@@ -70,11 +70,11 @@ begin
         
             -- Caso 1
                 Coin_in <= "001";
-                wait for 10 ns;
+                wait for 5 ns;
                 Coin_in <= "000";
-                wait for 10 ns;
+                wait for 5 ns;
                 Coin_in <= "001";
-                wait for 10 ns;
+                wait for 5 ns;
                 
             -- Rst caso 1
                 rst <= '1';
@@ -82,9 +82,9 @@ begin
                     report "Error Test 1" severity error;
                 Coin_in <= "000";
                 Coin_out <= "000";
-                wait for 10ns;
+                wait for 5 ns;
                 rst <= '0';
-                wait for 10 ns;
+                wait for 5 ns;
               
       ---------- Caso 2
                 Coin_in <= "001";

@@ -55,7 +55,7 @@ Generic( N : integer := 3
 Port ( clk : in std_logic;
        A,B : in std_logic_vector(N-1 downto 0);
        add_sub : in std_logic;
-       S : out std_logic_vector(N downto 0)
+       S : out std_logic_vector(N-1 downto 0)
     );
 end component;
 
