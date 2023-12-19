@@ -36,7 +36,6 @@ architecture Behavioral of canMachine is
 type state is (E0,E1,E2);
 signal CS,NS : state; -- Current State, Next State
 signal money_in : std_logic_vector(2 downto 0);
---signal counter : std_logic_vector(2 downto 0);  
 signal precio_lata : unsigned(2 downto 0) := "010";
 
 begin
@@ -47,17 +46,14 @@ begin
     if rising_edge(clk) then
         if rst = '0' then
             CS <= NS;
-            --counter <= std_logic_vector(unsigned(counter) + unsigned(coin_in));
-            --report "Counter: " & integer'image(to_integer(unsigned(counter)));
         else
-            --counter <= "000";
             CS <= E0;
         end if;
     end if;
 end process;
 
 -- Salidas
-process(CS,coin_in,rst,money_in,precio_lata)--counter)
+process(CS,coin_in)
 begin
     case CS is 
         when E0 =>
@@ -98,7 +94,6 @@ begin
             end if;            
          when E2 => 
             lata <= '1';
-            --money_in <= counter;
             report "Money_in: " & integer'image(to_integer(unsigned(money_in)));
             coin_out <= std_logic_vector(unsigned(money_in) - unsigned(precio_lata));
             NS <= E0;
