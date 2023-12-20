@@ -26,6 +26,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity canMachine is
 Port ( clk, rst : in std_logic;
        coin_in : in std_logic_vector(2 downto 0); 
+       empty : in std_logic;
        lata : out std_logic; 
        coin_out : out std_logic_vector(2 downto 0)
       );
@@ -34,13 +35,12 @@ end canMachine;
 architecture Behavioral of canMachine is
 
 type state is (E0,E1,E2);
-signal CS,NS : state; -- Current State, Next State
+signal CS,NS : state; 
 signal money_in : std_logic_vector(2 downto 0);
-signal precio_lata : unsigned(2 downto 0) := "010";
+constant precio_lata : unsigned(2 downto 0) := "010";
 
 begin
 
--- Cambios de Estado con RST sincrono, suma del cambio introducido
 process(clk)
 begin
     if rising_edge(clk) then
@@ -52,11 +52,12 @@ begin
     end if;
 end process;
 
--- Salidas
 process(CS,coin_in)
 begin
+
     case CS is 
-        when E0 =>
+    
+       when E0 =>
             money_in <= "000";
             lata <= '0';
             coin_out <= "000";
@@ -91,13 +92,21 @@ begin
                 money_in <= "110";
             else
                 NS <= CS;
-            end if;            
+            end if;
+                        
          when E2 => 
+         
             lata <= '1';
-            report "Money_in: " & integer'image(to_integer(unsigned(money_in)));
             coin_out <= std_logic_vector(unsigned(money_in) - unsigned(precio_lata));
             NS <= E0;
-
+            
+            -- Caso en el que el inventario estubiese vacio : 
+            -- if empty = '0' then
+            --      lata <= '1';
+            -- else
+            --      coin_out <= money_in;
+            --      NS <= E0;
+            
     end case;
 end process;
 
