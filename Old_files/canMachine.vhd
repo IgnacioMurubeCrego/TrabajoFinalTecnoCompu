@@ -52,7 +52,7 @@ begin
     end if;
 end process;
 
-process(CS,coin_in,empty)
+process(CS,coin_in)
 begin
 
     case CS is 
@@ -96,18 +96,10 @@ begin
                         
          when E2 => 
          
-            --lata <= '1';
-            --coin_out <= std_logic_vector(unsigned(money_in) - unsigned(precio_lata));
-            --NS <= E0;
-            if empty = '0' then
-                lata <= '1';
-                coin_out <= std_logic_vector(unsigned(money_in) - unsigned(precio_lata));
-            else
-                lata <= '0';
-                coin_out <= money_in;
-            end if;
-            
+            lata <= '1';
+            coin_out <= std_logic_vector(unsigned(money_in) - unsigned(precio_lata));
             NS <= E0;
+            
             -- Caso en el que el inventario estubiese vacio : 
             -- if empty = '0' then
             --      lata <= '1';
